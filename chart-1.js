@@ -2,22 +2,19 @@ document.addEventListener('DOMContentLoaded', function() {
     const filterSelect = document.getElementById('filter');
     const latePaymentsLinks = document.querySelectorAll('#latePayments a');
     const chart = d3.select('#chart');
-
     // Load the data
     d3.json('data2.json').then(data => {
         if (!data || !Array.isArray(data)) {
             console.error('Invalid data format');
             return;
         }
-
         // Initial render
-        updateChart(filterSelect.value, getSelectedLatePayments(), data);
-
+        updateChart('default', 'all', data);
         // Update chart on filter change
         filterSelect.addEventListener('change', function() {
-            updateChart(this.value, getSelectedLatePayments(), data);
-        });
+            updateChart('default', 'all', data);
 
+        });
         latePaymentsLinks.forEach(link => {
             link.addEventListener('click', function(event) {
                 event.preventDefault();
@@ -25,23 +22,23 @@ document.addEventListener('DOMContentLoaded', function() {
                 updateChart(filterSelect.value, value, data);
             });
         });
-
         function getSelectedLatePayments() {
             const selectedLink = document.querySelector('#latePayments a.selected');
             return selectedLink ? selectedLink.getAttribute('data-value') : 'all';
         }
-
         function updateChart(filter, latePayments, data) {
             chart.selectAll('*').remove(); // Clear previous chart
-
             // Filter data based on the number of late payments
             let filteredData = data;
             if (latePayments !== 'all') {
                 filteredData = data.filter(d => d.late_payments == latePayments);
             }
-
             let aggregatedData;
             switch (filter) {
+                case 'default':
+                    aggregatedData = d3.rollup(filteredData, v => d3.sum(v, d => d.count), d => d.late_payments);
+                    renderBarChart(aggregatedData, 'Number of Late Payments', 'Count');
+                    break;
                 case 'sex':
                     aggregatedData = d3.rollup(filteredData, v => d3.sum(v, d => d.count), d => d.sex);
                     renderPieChart(aggregatedData, 'Gender', true);
@@ -58,19 +55,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     aggregatedData = d3.rollup(filteredData, v => d3.sum(v, d => d.count), d => d.education);
                     renderBarChart(aggregatedData, 'Education Level', 'Count');
                     break;
-                case 'default': // Add this case if 'default' should be handled
-                    console.warn('Default filter type:', filter);
-                    // Handle 'default' case
-                    break;
-                case 'gender': // Add this case if 'gender' should be handled
-                    console.warn('Gender filter type:', filter);
-                    // Handle 'gender' case
-                    break;
                 default:
                     console.warn('Unknown filter type:', filter);
             }
         }
-
         function renderBarChart(data, xLabel, yLabel) {
             const margin = { top: 20, right: 30, bottom: 40, left: 50 };
             const width = 600 - margin.left - margin.right;
@@ -117,7 +105,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 .attr('text-anchor', 'middle')
                 .text(yLabel);
         }
-
         function renderPieChart(data, label, showLegend, isMaritalStatus = false) {
             const margin = { top: 20, right: 30, bottom: 40, left: 30 };
             const width = 400 - margin.left - margin.right;
@@ -129,7 +116,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 .append('g')
                 .attr('transform', `translate(${width / 2 + margin.left},${height / 2 + margin.top})`);
             const color = d3.scaleOrdinal(d3.schemeCategory10);
-            const pie = d3.pie().value(d => d[1]); // Ensure d[1] matches the data structure
+            const pie = d3.pie().value(d => d[1]);
             const arc = d3.arc().outerRadius(radius - 10).innerRadius(0);
             const arcLabel = d3.arc().outerRadius(radius - 40).innerRadius(radius - 40);
             const pieData = pie(Array.from(data.entries()));
@@ -150,8 +137,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     .text(d => d.data[0]);
             }
         }
-        
-
         function renderHistogram(data, xLabel, yLabel) {
             const margin = { top: 20, right: 30, bottom: 40, left: 50 };
             const width = 600 - margin.left - margin.right;
@@ -201,12 +186,10 @@ document.addEventListener('DOMContentLoaded', function() {
     }).catch(error => {
         console.error('Error loading or processing data:', error);
     });
-
     function toggleDropdown() {
         const menu = document.getElementById('latePayments');
         menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
     }
-
     // Optional: Hide dropdown when clicking outside
     window.addEventListener('click', function(event) {
         const dropdown = document.querySelector('.dropdown');
