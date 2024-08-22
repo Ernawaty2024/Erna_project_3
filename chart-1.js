@@ -74,7 +74,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         function renderBarChart(data, xLabel, yLabel) {
-            const margin = { top: 20, right: 30, bottom: 40, left: 50 };
+            const margin = { top: 20, right: 30, bottom: 40, left: 70 }; // Increased left margin
             const width = 600 - margin.left - margin.right;
             const height = 400 - margin.top - margin.bottom;
             const svg = chart.append('svg')
@@ -119,6 +119,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 .attr('text-anchor', 'middle')
                 .text(yLabel);
         }
+        
 
         function renderPieChart(data, label) {
             const margin = { top: 20, right: 30, bottom: 40, left: 30 };
