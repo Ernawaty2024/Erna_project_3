@@ -1,24 +1,24 @@
 document.addEventListener('DOMContentLoaded', function() {
     const filterSelect = document.getElementById('filter');
     const latePaymentsLinks = document.querySelectorAll('#latePayments a');
-    const chart = d3.select('#chart');
-
+    const chart1Container = document.getElementById('chart1');
+    const chart1LegendContainer = document.getElementById('chart1Legend');
+    
     // Load the data
     d3.json('data2.json').then(data => {
         if (!data || !Array.isArray(data)) {
             console.error('Invalid data format');
             return;
         }
-
+        
         // Initial render
         updateChart('default', 'all', data);
-
+        
         // Update chart on filter change
         filterSelect.addEventListener('change', function() {
             updateChart(filterSelect.value, getSelectedLatePayments(), data);
         });
-
-        // Update chart on late payments link click
+        
         latePaymentsLinks.forEach(link => {
             link.addEventListener('click', function(event) {
                 event.preventDefault();
@@ -33,16 +33,15 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         function updateChart(filter, latePayments, data) {
-            console.log('Filtered Data:', data);
-            chart.selectAll('*').remove(); // Clear previous chart
+            // Clear previous chart and legend
+            chart1Container.innerHTML = '';
+            chart1LegendContainer.innerHTML = '';
 
             // Filter data based on the number of late payments
             let filteredData = data;
             if (latePayments !== 'all') {
                 filteredData = data.filter(d => d.late_payments == latePayments);
             }
-
-            console.log('Filtered Data:', filteredData);
 
             let aggregatedData;
             switch (filter) {
@@ -52,15 +51,15 @@ document.addEventListener('DOMContentLoaded', function() {
                     break;
                 case 'gender':
                     aggregatedData = d3.rollup(filteredData, v => d3.sum(v, d => d.count), d => d.sex);
-                    renderPieChart(aggregatedData, 'Gender');
+                    renderPieChart(aggregatedData, 'Gender', true);
                     break;
                 case 'marriage':
                     aggregatedData = d3.rollup(filteredData, v => d3.sum(v, d => d.count), d => d.marriage);
-                    renderPieChart(aggregatedData, 'Marital Status');
+                    renderPieChart(aggregatedData, 'Marital Status', false);
                     break;
                 case 'age_bin':
                     aggregatedData = d3.rollup(filteredData, v => d3.sum(v, d => d.count), d => d.age_bin);
-                    renderHistogram(aggregatedData, 'Age Group', 'Count');
+                    renderBarChart(aggregatedData, 'Age Group', 'Count');
                     break;
                 case 'education':
                     aggregatedData = d3.rollup(filteredData, v => d3.sum(v, d => d.count), d => d.education);
@@ -69,163 +68,105 @@ document.addEventListener('DOMContentLoaded', function() {
                 default:
                     console.warn('Unknown filter type:', filter);
             }
-
-            console.log('Aggregated Data:', aggregatedData);
         }
 
         function renderBarChart(data, xLabel, yLabel) {
-            const margin = { top: 20, right: 30, bottom: 40, left: 70 }; // Increased left margin
+            const margin = { top: 20, right: 20, bottom: 40, left: 70 };
             const width = 600 - margin.left - margin.right;
             const height = 400 - margin.top - margin.bottom;
-            const svg = chart.append('svg')
+
+            const svg = d3.select('#chart1')
+                .append('svg')
                 .attr('width', width + margin.left + margin.right)
                 .attr('height', height + margin.top + margin.bottom)
                 .append('g')
                 .attr('transform', `translate(${margin.left},${margin.top})`);
+
             const x = d3.scaleBand()
                 .domain(Array.from(data.keys()))
                 .range([0, width])
                 .padding(0.1);
+
             const y = d3.scaleLinear()
                 .domain([0, d3.max(Array.from(data.values()))])
                 .nice()
                 .range([height, 0]);
+
             svg.append('g')
                 .selectAll('.bar')
                 .data(Array.from(data.entries()))
-                .enter().append('rect')
+                .enter()
+                .append('rect')
                 .attr('class', 'bar')
                 .attr('x', d => x(d[0]))
                 .attr('y', d => y(d[1]))
                 .attr('width', x.bandwidth())
                 .attr('height', d => height - y(d[1]))
-                .attr('fill', '#007bff');
+                .attr('fill', '#4A90E2');
+
             svg.append('g')
                 .attr('class', 'x-axis')
                 .attr('transform', `translate(0,${height})`)
-                .call(d3.axisBottom(x));
+                .call(d3.axisBottom(x))
+                .append('text')
+                .attr('class', 'x-axis-label')
+                .attr('x', width / 2)
+                .attr('y', 30)
+                .attr('fill', '#333')
+                .text(xLabel);
+
             svg.append('g')
                 .attr('class', 'y-axis')
-                .call(d3.axisLeft(y));
-            svg.append('text')
-                .attr('transform', `translate(${width / 2},${height + margin.bottom})`)
-                .attr('text-anchor', 'middle')
-                .text(xLabel);
-            svg.append('text')
+                .call(d3.axisLeft(y))
+                .append('text')
+                .attr('class', 'y-axis-label')
+                .attr('x', -40)
+                .attr('y', height / 2)
+                .attr('fill', '#333')
                 .attr('transform', 'rotate(-90)')
-                .attr('y', 0 - margin.left)
-                .attr('x', 0 - height / 2)
-                .attr('dy', '1em')
-                .attr('text-anchor', 'middle')
                 .text(yLabel);
         }
-        
 
-        function renderPieChart(data, label) {
-            const margin = { top: 20, right: 30, bottom: 40, left: 30 };
-            const width = 400 - margin.left - margin.right;
-            const height = 400 - margin.top - margin.bottom;
+        function renderPieChart(data, title, showLegend) {
+            const width = 400;
+            const height = 400;
             const radius = Math.min(width, height) / 2;
-            const color = d3.scaleOrdinal(d3.schemeCategory10);
-            const svg = chart.append('svg')
-                .attr('width', width + margin.left + margin.right)
-                .attr('height', height + margin.top + margin.bottom)
+
+            const svg = d3.select('#chart1')
+                .append('svg')
+                .attr('width', width)
+                .attr('height', height)
                 .append('g')
-                .attr('transform', `translate(${width / 2 + margin.left},${height / 2 + margin.top})`);
+                .attr('transform', `translate(${width / 2},${height / 2})`);
+
+            const color = d3.scaleOrdinal(d3.schemeCategory10);
+
             const pie = d3.pie()
                 .sort(null)
                 .value(d => d[1]);
+
             const arc = d3.arc()
                 .outerRadius(radius - 10)
                 .innerRadius(0);
-            const arcLabel = d3.arc()
-                .outerRadius(radius - 40)
-                .innerRadius(radius - 40);
-            const dataArray = Array.from(data.entries());
-            const g = svg.selectAll('.arc')
-                .data(pie(dataArray))
-                .enter().append('g')
-                .attr('class', 'arc');
-            g.append('path')
+
+            const pieData = pie(Array.from(data.entries()));
+
+            svg.selectAll('path')
+                .data(pieData)
+                .enter()
+                .append('path')
                 .attr('d', arc)
                 .attr('fill', d => color(d.data[0]));
-            g.append('text')
-                .attr('transform', d => `translate(${arcLabel.centroid(d)})`)
-                .attr('dy', '0.35em')
-                .attr('text-anchor', 'middle')
-                .text(d => d.data[0]);
 
-            // Add legend
-            const legend = chart.append('div')
-                .attr('class', 'legend')
-                .style('position', 'absolute')
-                .style('top', '0')
-                .style('right', '0')
-                .style('padding', '10px')
-                .style('background', '#fff')
-                .style('border', '1px solid #ddd')
-                .style('border-radius', '5px');
-
-            dataArray.forEach((d, i) => {
-                const legendRow = legend.append('div')
-                    .style('display', 'flex')
-                    .style('align-items', 'center')
-                    .style('margin-bottom', '5px');
-                legendRow.append('div')
-                    .style('width', '18px')
-                    .style('height', '18px')
-                    .style('background-color', color(d[0]))
-                    .style('margin-right', '10px');
-                legendRow.append('span')
-                    .text(d[0]);
-            });
-        }
-
-        function renderHistogram(data, xLabel, yLabel) {
-            const margin = { top: 20, right: 30, bottom: 40, left: 50 };
-            const width = 600 - margin.left - margin.right;
-            const height = 400 - margin.top - margin.bottom;
-            const svg = chart.append('svg')
-                .attr('width', width + margin.left + margin.right)
-                .attr('height', height + margin.top + margin.bottom)
-                .append('g')
-                .attr('transform', `translate(${margin.left},${margin.top})`);
-            const x = d3.scaleBand()
-                .domain(Array.from(data.keys()))
-                .range([0, width])
-                .padding(0.1);
-            const y = d3.scaleLinear()
-                .domain([0, d3.max(Array.from(data.values()))])
-                .nice()
-                .range([height, 0]);
-            svg.append('g')
-                .selectAll('.bar')
-                .data(Array.from(data.entries()))
-                .enter().append('rect')
-                .attr('class', 'bar')
-                .attr('x', d => x(d[0]))
-                .attr('y', d => y(d[1]))
-                .attr('width', x.bandwidth())
-                .attr('height', d => height - y(d[1]))
-                .attr('fill', '#007bff');
-            svg.append('g')
-                .attr('class', 'x-axis')
-                .attr('transform', `translate(0,${height})`)
-                .call(d3.axisBottom(x));
-            svg.append('g')
-                .attr('class', 'y-axis')
-                .call(d3.axisLeft(y));
-            svg.append('text')
-                .attr('transform', `translate(${width / 2},${height + margin.bottom})`)
-                .attr('text-anchor', 'middle')
-                .text(xLabel);
-            svg.append('text')
-                .attr('transform', 'rotate(-90)')
-                .attr('y', 0 - margin.left)
-                .attr('x', 0 - height / 2)
-                .attr('dy', '1em')
-                .attr('text-anchor', 'middle')
-                .text(yLabel);
+            if (showLegend) {
+                // Add legend
+                const legend = d3.select('#chart1Legend');
+                Array.from(data.entries()).forEach(d => {
+                    legend.append('div')
+                        .text(d[0])
+                        .style('color', color(d[0]));
+                });
+            }
         }
     });
 });
