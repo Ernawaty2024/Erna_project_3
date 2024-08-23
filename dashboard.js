@@ -50,11 +50,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 break;
             case 'gender':
                 aggregatedData = d3.rollup(filteredData, v => v.length, d => d.sex);
-                renderPieChart(aggregatedData, `${latePaymentsText.toUpperCase()} LATE ACC GENDER DISTRIBUTION`, true, chart1Container, 'gender');
+                renderBarChart(Array.from(aggregatedData), `${latePaymentsText.toUpperCase()} LATE ACC GENDER DISTRIBUTION`, 'COUNT', chart1Container, false, false, 0.1, 'gender');
                 break;
             case 'marriage':
                 aggregatedData = d3.rollup(filteredData, v => v.length, d => d.marriage);
-                renderPieChart(aggregatedData, `${latePaymentsText.toUpperCase()} LATE ACC MARITAL STATUS DISTRIBUTION`, true, chart1Container, 'marriage');
+                renderBarChart(Array.from(aggregatedData), `${latePaymentsText.toUpperCase()} LATE ACC MARITAL STATUS DISTRIBUTION`, 'COUNT', chart1Container, false, false, 0.1, 'marriage');
                 break;
             case 'age_bin':
                 aggregatedData = d3.rollup(filteredData, v => v.length, d => d.age_bin);
@@ -91,11 +91,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 break;
             case 'gender':
                 aggregatedData = d3.rollup(filteredData, v => v.length, d => d.sex);
-                renderBarChart(Array.from(aggregatedData), `CREDIT UTILIZATION RATIO - ${filter.toUpperCase()} DISTRIBUTION`, 'COUNT', chart2Container);
+                renderBarChart(Array.from(aggregatedData), `CREDIT UTILIZATION RATIO - ${filter.toUpperCase()} DISTRIBUTION`, 'COUNT', chart2Container, false, false, 0.1, 'gender');
                 break;
             case 'marriage':
                 aggregatedData = d3.rollup(filteredData, v => v.length, d => d.marriage);
-                renderBarChart(Array.from(aggregatedData), `CREDIT UTILIZATION RATIO - ${filter.toUpperCase()} DISTRIBUTION`, 'COUNT', chart2Container);
+                renderBarChart(Array.from(aggregatedData), `CREDIT UTILIZATION RATIO - ${filter.toUpperCase()} DISTRIBUTION`, 'COUNT', chart2Container, false, false, 0.1, 'marriage');
                 break;
             case 'age_bin':
                 aggregatedData = d3.rollup(filteredData, v => v.length, d => d.age_bin);
@@ -182,9 +182,28 @@ document.addEventListener('DOMContentLoaded', function() {
 
         const educationColor = d3.scaleOrdinal()
             .domain(['graduate school', 'high school', 'others', 'university', 'unknown'])
-            .range(['green', 'brown', 'blue', 'red', 'orange']);
+            .range(['green', 'green', 'blue', 'red', 'orange']);
 
-        let colorScale = category === 'age_bin' ? ageGroupColor : educationColor;
+        const genderColor = d3.scaleOrdinal()
+            .domain(['female', 'male'])
+            .range(['yellow', 'red']);
+
+        const maritalStatusColor = d3.scaleOrdinal()
+            .domain(['married', 'others', 'single'])
+            .range(['blue', 'orange', 'green']);
+
+        let colorScale;
+        if (category === 'age_bin') {
+            colorScale = ageGroupColor;
+        } else if (category === 'education') {
+            colorScale = educationColor;
+        } else if (category === 'gender') {
+            colorScale = genderColor;
+        } else if (category === 'marriage') {
+            colorScale = maritalStatusColor;
+        } else {
+            colorScale = d3.scaleOrdinal(d3.schemeCategory10);
+        }
 
         svg.append('g')
             .selectAll('.bar')
@@ -255,7 +274,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         const educationColor = d3.scaleOrdinal()
             .domain(['graduate school', 'high school', 'others', 'university', 'unknown'])
-            .range(['green', 'brown', 'blue', 'red', 'orange']);
+            .range(['green', 'green', 'blue', 'red', 'orange']);
 
         const color = filter === 'marriage' ? maritalStatusColor 
                      : filter === 'gender' ? genderColor 
@@ -349,7 +368,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         const educationColor = d3.scaleOrdinal()
             .domain(['graduate school', 'high school', 'others', 'university', 'unknown'])
-            .range(['green', 'brown', 'blue', 'red', 'orange']);
+            .range(['green', 'green', 'blue', 'red', 'orange']);
 
         const ageGroupColor = d3.scaleOrdinal()
             .domain(['18-24', '25-34', '35-44', '45-54', '55-64', '65+'])
