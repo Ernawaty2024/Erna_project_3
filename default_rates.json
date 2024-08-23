@@ -1,0 +1,92 @@
+{
+    "gender": [
+        {
+            "gender": "F",
+            "default_payment_next_month": 0.2101010101010101,
+            "default_rate": 21.01010101010101
+        },
+        {
+            "gender": "M",
+            "default_payment_next_month": 0.2438171584513048,
+            "default_rate": 24.38171584513048
+        }
+    ],
+    "education": [
+        {
+            "education": "0",
+            "default_payment_next_month": 0.0,
+            "default_rate": 0.0
+        },
+        {
+            "education": "graduate school",
+            "default_payment_next_month": 0.19234766178554558,
+            "default_rate": 19.23476617855456
+        },
+        {
+            "education": "high school",
+            "default_payment_next_month": 0.2515761643278422,
+            "default_rate": 25.15761643278422
+        },
+        {
+            "education": "university",
+            "default_payment_next_month": 0.23734853884533144,
+            "default_rate": 23.734853884533145
+        }
+    ],
+    "marital_status": [
+        {
+            "marital_status": "married",
+            "default_payment_next_month": 0.23747114453794027,
+            "default_rate": 23.747114453794026
+        },
+        {
+            "marital_status": "others",
+            "default_payment_next_month": 0.26666666666666666,
+            "default_rate": 26.666666666666668
+        },
+        {
+            "marital_status": "single",
+            "default_payment_next_month": 0.21113792227584455,
+            "default_rate": 21.113792227584455
+        }
+    ],
+    "age_group": [
+        {
+            "age_group": "18-30",
+            "default_payment_next_month": 0.22678703021370672,
+            "default_rate": 22.678703021370673
+        },
+        {
+            "age_group": "31-40",
+            "default_payment_next_month": 0.2066123531640773,
+            "default_rate": 20.66123531640773
+        },
+        {
+            "age_group": "41-50",
+            "default_payment_next_month": 0.23504490764277242,
+            "default_rate": 23.504490764277243
+        },
+        {
+            "age_group": "51-60",
+            "default_payment_next_month": 0.2545824847250509,
+            "default_rate": 25.45824847250509
+        },
+        {
+            "age_group": "60+",
+            "default_payment_next_month": 0.27137546468401486,
+            "default_rate": 27.137546468401485
+        }
+    ],
+    "customer_value_segment": [
+        {
+            "customer_value_segment": "High-Value",
+            "default_payment_next_month": 0.14224897240164416,
+            "default_rate": 14.224897240164417
+        },
+        {
+            "customer_value_segment": "Low-Value",
+            "default_payment_next_month": 0.24782264449722882,
+            "default_rate": 24.78226444972288
+        }
+    ]
+}

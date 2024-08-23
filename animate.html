@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Credit Card Spending by Age Range</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        #myChart {
+            width: 100px;
+            height: 50px;
+        }
+    </style>
+</head>
+<body>
+    <div>
+        <label for="ageRange">Select Age Range:</label>
+        <select id="ageRange" onchange="updateChart()">
+            <option value="18-24">18-24</option>
+            <option value="25-34">25-34</option>
+            <option value="35-44">35-44</option>
+            <option value="45-54">45-54</option>
+            <option value="55-64">55-64</option>
+            <option value="65+">65+</option>
+        </select>
+        <button onclick="resetChart()">Reset</button>
+    </div>
+    <canvas id="myChart" width="100" height="50"></canvas>
+    <script src="script.js"></script>
+</body>
+</html>

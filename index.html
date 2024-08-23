@@ -4,53 +4,78 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard</title>
-    <link rel="apple-touch-icon" sizes="76x76" href="./assets/img/apple-icon.png">
-    <link rel="icon" type="image/png" href="./assets/img/favicon.png">
-    <title>Soft UI Dashboard Tailwind</title>
-    <!-- Fonts and icons -->
     <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700" rel="stylesheet">
-    <script src="https://kit.fontawesome.com/42d5adcbca.js" crossorigin="anonymous"></script>
-    <link href="./assets/css/nucleo-icons.css" rel="stylesheet">
-    <link href="./assets/css/nucleo-svg.css" rel="stylesheet">
-    <script src="https://unpkg.com/@popperjs/core@2"></script>
-    <link href="./assets/css/soft-ui-dashboard-tailwind.css?v=1.0.5" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
     <style>
-        /* Add any additional custom styles here */
-        .grid-container {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            grid-template-rows: repeat(2, 1fr);
-            gap: 20px;
-            height: 100vh;
+        body {
+            font-family: 'Open Sans', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f2f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
             padding: 20px;
         }
-        .grid-item {
-            background-color: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            position: relative;
-        }
-        .legend-container {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            font-size: 14px;
+        h1 {
             color: #333;
-            background: #fff;
-            padding: 10px;
+            margin-bottom: 20px;
+        }
+        .filter-container {
+            margin-bottom: 20px;
+        }
+        .charts-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .chart-row {
+            display: flex;
+            width: 100%;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .chart-wrapper {
+            flex: 1;
+            min-width: 300px;
+            background-color: white;
             border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 20px;
+        }
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .chart {
+            width: 100%;
+            height: 400px;
+        }
+        select {
+            width: 100%;
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+        }
+        @media (max-width: 768px) {
+            .chart-row {
+                flex-direction: column;
+            }
+            .chart-wrapper {
+                width: 100%;
+            }
         }
     </style>
 </head>
-<body class="bg-gray-100">
-    <div class="container mx-auto p-4">
-        <h1 class="text-2xl font-bold mb-4">Dashboard</h1>
-        <div class="mb-4">
-            <label for="filter" class="block text-sm font-medium text-gray-700">Select Filter:</label>
-            <select id="filter" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+<body>
+    <div class="container">
+        <h1>Dashboard</h1>
+        <div class="filter-container">
+            <label for="filter">Filter by:</label>
+            <select id="filter">
                 <option value="default">Default</option>
                 <option value="gender">Gender</option>
                 <option value="marriage">Marital Status</option>
@@ -58,56 +83,70 @@
                 <option value="education">Education Level</option>
             </select>
         </div>
-        <div class="mb-4">
-            <label for="latePayments" class="block text-sm font-medium text-gray-700">Select Late Payments:</label>
-            <div class="relative inline-block w-full">
-                <button id="dropdownButton" class="w-full bg-blue-500 text-white p-2 rounded-md">Late Payments</button>
-                <div id="latePayments" class="absolute hidden bg-white shadow-lg mt-1 rounded-md w-full">
-                    <a href="#" data-value="all" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">All</a>
-                    <a href="#" data-value="0" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">0</a>
-                    <a href="#" data-value="1" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">1</a>
-                    <a href="#" data-value="2" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">2</a>
-                    <a href="#" data-value="3" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">3</a>
-                    <a href="#" data-value="4" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">4</a>
-                    <a href="#" data-value="5" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">5</a>
-                    <a href="#" data-value="6" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">6</a>
+        <div class="charts-container">
+            <div class="chart-row">
+                <div class="chart-wrapper">
+                    <div class="chart-header">
+                        <h2>Late Payments</h2>
+                        <div>
+                            <label for="latePaymentsFilter">Select Late Payments:</label>
+                            <select id="latePaymentsFilter">
+                                <option value="all">All</option>
+                                <option value="0">0</option>
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                                <option value="5">5</option>
+                                <option value="6">6</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div id="chart1" class="chart"></div>
+                </div>
+                <div class="chart-wrapper">
+                    <div class="chart-header">
+                        <h2>Credit Score</h2>
+                        <div>
+                            <label for="creditScoreFilter">Credit Score Filter:</label>
+                            <select id="creditScoreFilter">
+                                <option value="all">All</option>
+                                <option value="above30">Above 30</option>
+                                <option value="below30">30 or Below</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div id="chart2" class="chart"></div>
                 </div>
             </div>
-        </div>
-        <div class="grid-container">
-            <div class="grid-item">
-                <div id="chart1">
-                    <div class="legend-container" id="chart1Legend"></div>
+            <div class="chart-row">
+                <div class="chart-wrapper">
+                    <div class="chart-header">
+                        <h2>Credit Card Usage</h2>
+                        <div>
+                            <label for="ageRange">Select Age Range:</label>
+                            <select id="ageRange" onchange="updateChart()">
+                                <option value="18-24">18-24</option>
+                                <option value="25-34">25-34</option>
+                                <option value="35-44">35-44</option>
+                                <option value="45-54">45-54</option>
+                                <option value="55-64">55-64</option>
+                                <option value="65+">65+</option>
+                            </select> 
+                        </div>
+                    </div>
+                        
+                    <div id="chart3" class="chart"></div>
                 </div>
-            </div>
-            <div class="grid-item">
-                <canvas id="chart2"></canvas>
-            </div>
-            <div class="grid-item">
-                <canvas id="chart3"></canvas>
-            </div>
-            <div class="grid-item">
-                <canvas id="chart4"></canvas>
+                <div class="chart-wrapper">
+                    <div class="chart-header">
+                        <h2>Chart 4</h2>
+                    </div>
+                    <div id="chart4" class="chart"></div>
+                </div>
             </div>
         </div>
     </div>
-    <script src="https://d3js.org/d3.v7.min.js"></script>
-    <script src="chart-1.js"></script>
-    <script>
-        // Dropdown toggle functionality
-        document.getElementById('dropdownButton').addEventListener('click', toggleDropdown);
-        function toggleDropdown() {
-            const menu = document.getElementById('latePayments');
-            menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
-        }
-        // Hide dropdown when clicking outside
-        window.addEventListener('click', function(event) {
-            const dropdown = document.querySelector('.relative');
-            const menu = document.getElementById('latePayments');
-            if (dropdown && !dropdown.contains(event.target) && menu && !menu.contains(event.target)) {
-                menu.style.display = 'none';
-            }
-        });
-    </script>
+    <script src="dashboard.js"></script>
 </body>
 </html>

@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Default Rate Chart</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="app.js" defer></script> <!-- Include the JS file -->
+</head>
+<body>
+    <h2>Credit Card Default Rates Analysis</h2>
+    
+    <label for="categorySelect">Select Category:</label>
+    <select id="categorySelect" onchange="updateChart()">
+        <option value="gender">Gender</option>
+        <option value="education">Education</option>
+        <option value="marital_status">Marital Status</option>
+        <option value="age_group">Age Group</option>
+        <option value="customer_value_segment">Customer Value Segment</option>
+    </select>
+    
+    <canvas id="myChart" width="400" height="200"></canvas>
+</body>
+</html>
